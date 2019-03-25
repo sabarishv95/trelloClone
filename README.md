@@ -1,7 +1,7 @@
 # trelloClone
 A Clone of trello.com
 
-The frontend of this project is built using React and the backend is build using NodeJS/Express and MongoDB.
+The frontend of this project is built using React and the backend is built using NodeJS/Express and MongoDB.
 
 After cloning into the repository, to run the app, do the following:
 
