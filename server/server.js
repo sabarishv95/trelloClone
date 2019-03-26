@@ -5,7 +5,16 @@ const mongoose=require('mongoose');
 var bodyParser = require("body-parser");
 var config = require('./config');
 
+//require APIs
+
+const BoardApi = require('./api/boards.api');
+const ListApi = require('./api/lists.api');
+const cardApi = require('./api/cards.api');
+const commentApi = require('./api/comments.api');
+
+
 // connect database
+
 mongoose.connect(config.db_host, { useNewUrlParser: true, useCreateIndex: true });
 
 mongoose.connection.on('connected',()=>{
@@ -21,6 +30,10 @@ mongoose.connection.on('error', (err) =>{
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'build')));
+app.use('/board', BoardApi);
+app.use('/list', ListApi);
+app.use('/card', cardApi);
+app.use('/comment', commentApi);
 
 app.get('*',function(req,res){
     res.sendFile(path.join(__dirname, 'build', 'index.html'));
