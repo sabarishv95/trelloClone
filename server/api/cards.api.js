@@ -10,7 +10,7 @@ const Comment = require('../models/comments.model')
 router.post(config.createCard, (req, res, next) => {
     Card.create(req.body).then((card) => {
         List.findById(req.body.list).then((list) => {
-            list.cards.push(card._id);
+            if(list.cards.indexOf(card._id) === -1) list.cards.push(card._id);
             list.save();
             res.json(card);
         }).catch((error) => {
@@ -61,7 +61,7 @@ router.put(config.moveCard, (req, res, next) => {
             }
         }, { new : true }).then((card) => {
             List.findById(req.params.toList).then((toList) => {
-                toList.cards.push(card._id);
+                if(toList.cards.indexOf(card._id) === -1) toList.cards.push(card._id);
                 toList.save();
                 res.json(toList);
             }).catch((error) => {

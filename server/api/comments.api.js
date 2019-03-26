@@ -10,7 +10,7 @@ const Comment = require('../models/comments.model');
 router.post(config.createComment, (req, res, next) => {
     Comment.create(req.body).then((comment) => {
         Card.findById(req.body.card).then((card) => {
-            card.comments.push(comment._id);
+            if(card.comments.indexOf(comment._id) === -1) card.comments.push(comment._id);
             card.save();
             res.json(comment);
         }).catch((error) => {

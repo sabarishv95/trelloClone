@@ -10,7 +10,7 @@ const Comment = require("../models/comments.model");
 router.post(config.createList, (req, res, next) => {
   List.create(req.body).then(list => {
       Board.findById(req.body.board).then(board => {
-          board.lists.push(list._id);
+          if(board.list.indexOf(list._id)  === -1) board.lists.push(list._id);
           board.save();
           res.json(list);
         }).catch(error => {
