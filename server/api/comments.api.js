@@ -21,4 +21,16 @@ router.post(config.createComment, (req, res, next) => {
     })
 })
 
+router.put(config.updateComment, (req, res, next) => {
+    Comment.findOneAndUpdate({ _id: req.params.id }, {
+        $set: {
+            ...req.body
+        }
+    }, { new : true }).then((comment) => {
+        res.json(comment)
+    }).catch((error) => {
+        next(error);
+    })
+})
+
 module.exports = router;

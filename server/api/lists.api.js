@@ -25,9 +25,9 @@ router.post(config.createList, (req, res, next) => {
 router.delete(config.deleteList, (req, res, next) => {
   List.findById(req.params.id).then(list => {
       List.deleteOne({ _id: req.params.id }).then(response => {
-          Card.remove({ list: req.params.id }).then(card => {
+          Card.deleteMany({ list: req.params.id }).then(card => {
               for (let i = 0; i < list.cards.length; i++) {
-                Comment.remove({ card: list.cards[i] })
+                Comment.deleteMany({ card: list.cards[i] })
                   .then(comment => {
                     if (i === list.cards.length - 1) {
                       Board.findById(req.params.boardId).then(board => {

@@ -6,7 +6,11 @@ var config = {
     createList: '/createList',
     deleteList: '/deleteList/:id/:boardId',
     createCard: '/createCard',
-    createComment: '/createComment'
+    updateCard: '/updateCard/:id',
+    moveCard: '/moveCard/:id/:fromList/:toList',
+    deleteCard: '/deleteCard/:id/:listId',
+    createComment: '/createComment',
+    updateComment: '/updateComment/:id'
   };
   
   module.exports = config;
