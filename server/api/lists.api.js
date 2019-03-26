@@ -31,7 +31,7 @@ router.delete(config.deleteList, (req, res, next) => {
                   .then(comment => {
                     if (i === list.cards.length - 1) {
                       Board.findById(req.params.boardId).then(board => {
-                          board.lists.splice(board.lists.indexOf(req.params.id),1);
+                          if(board.lists.indexOf(req.params.id) >=0 ) board.lists.splice(board.lists.indexOf(req.params.id),1);
                           board.save();
                           res.json(board);
                         }).catch(error => {

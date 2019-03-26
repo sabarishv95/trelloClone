@@ -37,7 +37,7 @@ router.delete(config.deleteCard, (req, res, next) => {
     Card.deleteOne({ _id: req.params.id }).then((cardDeleted) => {
         Comment.deleteMany({ card : req.params.id }).then((commentDeleted) => {
             List.findById(req.params.listId).then((list) => {
-                list.cards.splice(list.cards.indexOf(req.params.id), 1);
+                if(list.cards.indexOf(req.params.id) >= 0) list.cards.splice(list.cards.indexOf(req.params.id), 1);
                 list.save();
                 res.json(list);
             }).catch((error) => {
@@ -53,7 +53,7 @@ router.delete(config.deleteCard, (req, res, next) => {
 
 router.put(config.moveCard, (req, res, next) => {
     List.findById(req.params.fromList).then((fromList) => {
-        fromList.cards.splice(fromList.cards.indexOf(req.params.id), 1);
+        if(fromList.cards.indexOf(req.params.id) >= 0) fromList.cards.splice(fromList.cards.indexOf(req.params.id), 1);
         fromList.save();
         Card.findOneAndUpdate({ _id: req.params.id }, {
             $set: {
