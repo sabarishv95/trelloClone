@@ -5,7 +5,7 @@ const Board = require("../models/boards.model");
 
 //create an empty board
 router.post(config.createBoard, (req, res, next) => {
-  Board.create({}).then(board => {
+  Board.create(req.body).then(board => {
       res.json(board);
     }).catch(error => {
         next(error);

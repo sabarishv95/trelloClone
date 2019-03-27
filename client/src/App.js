@@ -1,26 +1,45 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import "bootstrap/dist/css/bootstrap.min.css";
+import {
+  BrowserRouter,
+  Route,
+  Switch
+} from "react-router-dom";
+import Boards from './Boards/Boards'
+import Board from './Board/Board'
+import './App.scss';
+import AppContext from './App.context'
 
 class App extends Component {
+
+  state = {
+    currentBoard: null
+  };
+  static contextType = AppContext;
+
+  manageBoard(board) {
+    this.setState({
+      currentBoard: board
+    })
+    localStorage.setItem('currentBoard', JSON.stringify(board))
+  }
+
   render() {
     return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
-      </div>
+      <BrowserRouter>
+        <React.Fragment>
+          <AppContext.Provider
+          value={{
+            currentBoard: this.state.currentBoard,
+            manageBoard: this.manageBoard.bind(this)
+          }}>
+            <Switch>
+              <Route exact path="/" component={Boards} />
+              <Route exact path="/board/:id" component={Board} />
+            </Switch>
+          </AppContext.Provider>
+        </React.Fragment>
+      </BrowserRouter>
     );
   }
 }

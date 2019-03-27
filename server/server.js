@@ -1,10 +1,10 @@
 const express = require('express');
 const app = express();
-var path = require('path');
-const mongoose=require('mongoose');
-var bodyParser = require("body-parser");
-var config = require('./config');
-
+const path = require('path');
+const mongoose = require('mongoose');
+const bodyParser = require("body-parser");
+const config = require('./config');
+const cors = require('cors')
 //require APIs
 
 const BoardApi = require('./api/boards.api');
@@ -17,16 +17,20 @@ const commentApi = require('./api/comments.api');
 
 mongoose.connect(config.db_host, { useNewUrlParser: true, useCreateIndex: true });
 
-mongoose.connection.on('connected',()=>{
+mongoose.connection.on('connected', () => {
     console.log('connected to mongodb');
 });
 
-mongoose.connection.on('error', (err) =>{
-    if(err){
-        console.log('error in connection is :'+ err)
+mongoose.connection.on('error', (err) => {
+    if (err) {
+        console.log('error in connection is :' + err)
     }
 });
 
+app.use(cors({
+    origin: config.CLIENT_ORIGIN,
+    credentials: true
+}));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'build')));
@@ -35,10 +39,10 @@ app.use('/list', ListApi);
 app.use('/card', cardApi);
 app.use('/comment', commentApi);
 
-app.get('*',function(req,res){
+app.get('*', function (req, res) {
     res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
-app.listen(config.server_port, function() {
+app.listen(config.server_port, function () {
     console.log(`App running on port ${config.server_port}`);
 });
