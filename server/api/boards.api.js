@@ -39,4 +39,31 @@ router.get(config.findAllBoards, (req, res, next) => {
     })
 });
 
+//find one board with its ID
+router.get(config.findOneBoard, (req, res, next) => {
+  Board.findById(req.params.id)
+    .populate("lists")
+    .populate({
+      path: "lists",
+      populate: {
+        path: "cards",
+        model: "Cards"
+      }
+    })
+    .populate({
+        path: "lists",
+        populate: {
+          path: "cards",
+          populate: {
+            path: "comments",
+            model: "Comments"
+          }
+        }
+      }).then((board) => {
+        res.json(board)
+    }).catch((error) => {
+        next(error)
+    })
+});
+
 module.exports = router;

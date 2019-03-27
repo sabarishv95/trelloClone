@@ -3,6 +3,7 @@ var config = {
     server_port: 4000,
     createBoard: '/createBoard',
     findAllBoards: '/findAllBoards',
+    findOneBoard: '/findBoard/:id',
     createList: '/createList',
     deleteList: '/deleteList/:id/:boardId',
     createCard: '/createCard',
