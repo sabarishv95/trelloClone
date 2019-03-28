@@ -29,4 +29,13 @@
             }
         }
     }
+
+    .create-board-form {
+        #boardName {
+            width: 100%;
+            border: none;
+            border-bottom: 2px solid #027bb0;
+            outline: none;
+        }
+    }
 }

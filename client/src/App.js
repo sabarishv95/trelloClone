@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import "bootstrap/dist/css/bootstrap.min.css";
 import {
   BrowserRouter,
   Route,
@@ -9,6 +8,9 @@ import Boards from './Boards/Boards'
 import Board from './Board/Board'
 import './App.scss';
 import AppContext from './App.context'
+import "jquery/dist/jquery.min.js";
+import "bootstrap/dist/js/bootstrap.min.js";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 class App extends Component {
 
@@ -21,7 +23,6 @@ class App extends Component {
     this.setState({
       currentBoard: board
     })
-    localStorage.setItem('currentBoard', JSON.stringify(board))
   }
 
   render() {

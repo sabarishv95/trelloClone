@@ -1,0 +1,41 @@
+.comments-wrapper {
+    .comment {
+        background: lightgray;
+        border: 1px solid transparent;
+        border-radius: 3px
+    }
+
+    .add-comment {
+        background: transparent; 
+        margin-top: 10px; 
+        cursor: pointer; 
+        border: 1px solid transparent; 
+        border-radius: 3px;
+    
+        p {  
+        span {  
+            margin-left: 10px;
+        }  
+        }
+    
+        &:hover {
+        background: rgba(9, 45, 66, 0.13);
+        }
+        .comment-form {
+            display: flex;
+            flex-direction: column;
+            div {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                .comment-title {
+                    border-radius: 3px;
+                }
+                i {
+                    font-size: 20px;
+                    margin-left: 10px;
+                }
+            }
+        }
+    }
+}
