@@ -1,7 +1,7 @@
 import React, { Component } from "react";
-import axios from "axios";
 import "./Boards.scss";
 import AppContext from "../App.context";
+import Common from '../Common'
 
 export default class Boards extends Component {
   constructor(props) {
@@ -11,67 +11,37 @@ export default class Boards extends Component {
       boardName: ""
     };
     this.goToBoard = this.goToBoard.bind(this);
+    this.common = new Common()
   }
   static contextType = AppContext;
 
   componentDidMount() {
-    axios
-      .get("/board/findAllBoards", {
-        header: {
-          "content-type": "application/json"
-        }
-      })
-      .then(response => {
-        this.setState({ boards: response.data });
-      });
+    this.common.get("/board/findAllBoards").then(response => {
+      this.setState({ boards: response.data });
+    });
   }
 
   goToBoard(id) {
-    axios
-      .get(`/board/findBoard/${id}`, {
-        header: {
-          "content-type": "application/json"
-        }
-      })
-      .then(response => {
-        this.context.manageBoard(response.data);
-        this.props.history.push(`/board/${id}`);
-      });
-  }
-
-  handleChange(e) {
-    e.persist();
-    this.setState(prevState => {
-      return {
-        [e.target.id]: e.target.value
-      };
+    this.common.get(`/board/findBoard/${id}`).then(response => {
+      this.context.manageBoard(response.data);
+      this.props.history.push(`/board/${id}`);
     });
   }
 
   createBoard() {
-    axios
-      .post(
-        `/board/createBoard`,
-        { name: this.state.boardName },
-        {
-          header: {
-            "content-type": "application/json"
-          }
+    this.common.post(`/board/createBoard`, { name: this.state.boardName }).then(response => {
+      this.setState(
+        prevState => {
+          return {
+            boards: [...prevState.boards, response.data]
+          };
+        },
+        () => {
+          this.context.manageBoard(response.data);
+          this.props.history.push(`/board/${response.data._id}`);
         }
-      )
-      .then(response => {
-        this.setState(
-          prevState => {
-            return {
-              boards: [...prevState.boards, response.data]
-            };
-          },
-          () => {
-            this.context.manageBoard(response.data);
-            this.props.history.push(`/board/${response.data._id}`);
-          }
-        );
-      });
+      );
+    });
   }
 
   render() {
@@ -129,7 +99,7 @@ export default class Boards extends Component {
                     className="board-name"
                     placeholder="Enter board name"
                     value={this.state.boardName}
-                    onChange={this.handleChange.bind(this)}
+                    onChange={this.common.handleChange.bind(this)}
                   />
                 </form>
               </div>

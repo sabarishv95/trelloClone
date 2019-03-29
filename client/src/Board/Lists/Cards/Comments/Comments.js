@@ -1,8 +1,8 @@
 import React, { Component } from "react";
 import "./Comments.scss";
-import axios from "axios";
 import AppContext from "../../../../App.context";
 import Textarea from 'react-textarea-autosize';
+import Common from '../../../../Common';
 
 export default class Comments extends Component {
   constructor(props) {
@@ -10,51 +10,21 @@ export default class Comments extends Component {
     this.state = {
       commentBody: "",
     };
+    this.common = new Common();
   }
 
   static contextType = AppContext;
 
-  handleChange(e) {
-    e.persist();
-    this.setState({
-      [e.target.id]: e.target.value
-    });
-  }
-
-  createComment(e) {
-    axios
-      .post(
-        `/comment/createComment`,
-        { body: this.state.commentBody, card: this.props.cardId },
-        {
-          header: {
-            "content-type": "application/json"
-          }
-        }
-      )
-      .then(response => {
-        this.setState(
-          prevState => {
-            return {
-              commentBody: ""
-            };
-          },
-          () => {
-            axios
-              .get(
-                `/board/findBoard/${this.props.boardId}`,
-                {
-                  header: {
-                    "content-type": "application/json"
-                  }
-                }
-              )
-              .then(response => {
-                this.context.manageBoard(response.data);
-              });
-          }
-        );
+  createComment() {
+    this.common.post(`/comment/createComment`, { body: this.state.commentBody, card: this.props.cardId }).then(response => {
+      this.setState({
+        commentBody: ""
+      }, () => {
+        this.common.get(`/board/findBoard/${this.props.boardId}`).then(response => {
+          this.context.manageBoard(response.data);
+        });
       });
+    });
   }
 
   render() {
@@ -71,7 +41,7 @@ export default class Comments extends Component {
                   className="comment-title"
                   placeholder="Enter comment body ..."
                   value={this.state.commentBody}
-                  onChange={this.handleChange.bind(this)}
+                  onChange={this.common.handleChange.bind(this)}
                 />
                 <div>
                   <button

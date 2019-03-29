@@ -1,9 +1,9 @@
 import React, { Component } from "react";
 import "./Cards.scss";
 import Comments from "./Comments/Comments";
-import axios from "axios";
 import AppContext from "../../../App.context";
 import Textarea from "react-textarea-autosize";
+import Common from '../../../Common';
 
 export default class Cards extends Component {
   constructor(props) {
@@ -14,54 +14,28 @@ export default class Cards extends Component {
       cardDescription: "",
       deleteCard: false
     };
+
+    this.common = new Common();
   }
 
   static contextType = AppContext;
 
-  handleChange(e) {
-    e.persist();
-    this.setState(prevState => {
-      return {
-        [e.target.id]: e.target.value
-      };
-    });
-  }
-
   createCard() {
-    axios
-      .post(
-        `/card/createCard/`,
-        {
-          title: this.state.cardTitle,
-          list: this.props.listId
+    this.common.post(`/card/createCard/`, { title: this.state.cardTitle, list: this.props.listId }).then(response => {
+      this.setState(
+        prevState => {
+          return {
+            cardTitle: "",
+            createCard: !prevState.createCard
+          };
         },
-        {
-          header: {
-            "content-type": "application/json"
-          }
+        () => {
+          this.common.get(`/board/findBoard/${this.props.boardId}`).then(response => {
+            this.context.manageBoard(response.data);
+          });
         }
-      )
-      .then(response => {
-        this.setState(
-          prevState => {
-            return {
-              cardTitle: "",
-              createCard: !prevState.createCard
-            };
-          },
-          () => {
-            axios
-              .get(`/board/findBoard/${this.props.boardId}`, {
-                header: {
-                  "content-type": "application/json"
-                }
-              })
-              .then(response => {
-                this.context.manageBoard(response.data);
-              });
-          }
-        );
-      });
+      );
+    });
   }
 
   updateCard() {
@@ -69,27 +43,11 @@ export default class Cards extends Component {
   }
 
   deleteCard() {
-    axios
-      .delete(
-        `/card/deleteCard//${this.props.card._id}/${this.props.listId}`,
-        {
-          header: {
-            "content-type": "application/json"
-          }
-        }
-      )
-      .then(response => {
-            axios
-              .get(`/board/findBoard/${this.props.boardId}`, {
-                header: {
-                  "content-type": "application/json"
-                }
-              })
-              .then(response => {
-                this.context.manageBoard(response.data);
-              });
-          }
-        );
+    this.common.delete(`/card/deleteCard//${this.props.card._id}/${this.props.listId}`).then(response => {
+      this.common.get(`/board/findBoard/${this.props.boardId}`).then(response => {
+        this.context.manageBoard(response.data);
+      });
+    });
   }
 
   render() {
@@ -124,7 +82,7 @@ export default class Cards extends Component {
                         id="cardTitle"
                         className="card-title m-0"
                         value={this.state.cardTitle}
-                        onChange={this.handleChange.bind(this)}
+                        onChange={this.common.handleChange.bind(this)}
                       />
                       <button
                         type="button"
@@ -146,7 +104,7 @@ export default class Cards extends Component {
                         className="card-description"
                         placeholder="Add a more detailed description ..."
                         value={this.state.cardDescription}
-                        onChange={this.handleChange.bind(this)}
+                        onChange={this.common.handleChange.bind(this)}
                       />
                       <div>
                         <button
@@ -183,14 +141,14 @@ export default class Cards extends Component {
                       <h5 className="font-weight-bold">Actions</h5>
                       <div className="actions-btn-wrapper">
                         <button className="move-btn btn mb-3">Move</button>
-                        <button className="delete-btn btn btn-danger" onClick={() => this.setState(prevState => { return { deleteCard: !prevState.deleteCard} })}>
+                        <button className="delete-btn btn btn-danger" onClick={() => this.setState(prevState => { return { deleteCard: !prevState.deleteCard } })}>
                           Delete
                         </button>
                       </div>
                       {this.state.deleteCard && <div className="delete-confirmation row">
                         <div className="col-12 delete-header mb-3 p-2">
                           <p className="m-0 font-weight-light">Delete Card?</p>
-                          <i className="fas fa-times" onClick={() => this.setState(prevState => { return { deleteCard: !prevState.deleteCard} })}/>
+                          <i className="fas fa-times" onClick={() => this.setState(prevState => { return { deleteCard: !prevState.deleteCard } })} />
                         </div>
                         <div className="col-12 mb-3">
                           <p className="m-0 delete-content">
@@ -233,7 +191,7 @@ export default class Cards extends Component {
                   className="card-title d-block"
                   placeholder="Enter card title"
                   value={this.state.cardTitle}
-                  onChange={this.handleChange.bind(this)}
+                  onChange={this.common.handleChange.bind(this)}
                 />
                 <div>
                   <button

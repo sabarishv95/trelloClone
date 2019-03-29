@@ -2,25 +2,17 @@ import React, { Component } from "react";
 import Lists from "./Lists/Lists";
 import "./Board.scss";
 import AppContext from "../App.context";
-import axios from "axios";
+import Common from '../Common'
 
 export default class Board extends Component {
   static contextType = AppContext;
+  common = new Common();
 
   componentDidMount() {
     if (!this.context.currentBoard) {
-      axios
-        .get(
-          `/board/findBoard/${this.props.match.params.id}`,
-          {
-            header: {
-              "content-type": "application/json"
-            }
-          }
-        )
-        .then(response => {
-          this.context.manageBoard(response.data);
-        });
+      this.common.get(`/board/findBoard/${this.props.match.params.id}`).then(response => {
+        this.context.manageBoard(response.data);
+      });
     }
   }
 

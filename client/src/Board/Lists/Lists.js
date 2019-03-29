@@ -1,8 +1,8 @@
 import React, { Component } from "react";
 import "./Lists.scss";
 import Cards from "./Cards/Cards";
-import axios from "axios";
 import AppContext from "../../App.context";
+import Common from '../../Common';
 
 class Lists extends Component {
   constructor(props) {
@@ -13,80 +13,34 @@ class Lists extends Component {
       editList: false
     };
     this.deleteList = this.deleteList.bind(this);
+    this.common = new Common()
   }
 
   static contextType = AppContext;
 
-  handleChange(e) {
-    e.persist();
-    this.setState(prevState => {
-      return {
-        [e.target.id]: e.target.value
-      };
+  createList() {
+    this.common.post(`/list/createList`, { title: this.state.listTitle, board: this.props.boardId }).then(response => {
+      this.setState({
+        listTitle: "",
+        createList: false
+      }, () => {
+        this.common.get(`/board/findBoard/${this.props.boardId}`).then(response => {
+          this.context.manageBoard(response.data);
+        });
+      });
     });
   }
 
-  createList() {
-    axios
-      .post(
-        `/list/createList`,
-        { title: this.state.listTitle, board: this.props.boardId },
-        {
-          header: {
-            "content-type": "application/json"
-          }
-        }
-      )
-      .then(response => {
-        this.setState(
-          prevState => {
-            return {
-              listTitle: "",
-              createList: false
-            };
-          },
-          () => {
-            axios
-              .get(`/board/findBoard/${this.props.boardId}`, {
-                header: {
-                  "content-type": "application/json"
-                }
-              })
-              .then(response => {
-                this.context.manageBoard(response.data);
-              });
-          }
-        );
-      });
-  }
-
   deleteList(id) {
-    axios
-      .delete(`/list/deleteList/${id}/${this.props.boardId}`, {
-        header: {
-          "content-type": "application/json"
-        }
-      })
-      .then(response => {
-        this.setState(
-          prevState => {
-            return {
-              editList: false
-            };
-          },
-          () => {
-            axios
-              .get(`/board/findBoard/${this.props.boardId}`, {
-                header: {
-                  "content-type": "application/json"
-                }
-              })
-              .then(response => {
-                this.context.manageBoard(response.data);
-              });
-          }
-        );
+    this.common.delete(`/list/deleteList/${id}/${this.props.boardId}`).then(response => {
+      this.setState({
+        editList: false
+      }, () => {
+        this.common.get(`/board/findBoard/${this.props.boardId}`).then(response => {
+          this.context.manageBoard(response.data);
+        });
       });
+    });
   }
 
   closeList(e) {
@@ -187,7 +141,8 @@ class Lists extends Component {
                   className="list-title"
                   placeholder="Enter list title"
                   value={this.state.listTitle}
-                  onChange={this.handleChange.bind(this)}
+                  onChange={this.common.handleChange.bind(this)}
+                  onClick={e => e.stopPropagation()}
                 />
                 <div>
                   <button
