@@ -7,8 +7,7 @@ const cardsSchema = new mongoose.Schema({
         required:true
     },
     description: {
-        type: String,
-        required: true
+        type: String
     },
     comments: [{
         type: mongoose.Schema.Types.ObjectId,

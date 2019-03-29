@@ -4,7 +4,7 @@ const path = require('path');
 const mongoose = require('mongoose');
 const bodyParser = require("body-parser");
 const config = require('./config');
-const cors = require('cors')
+const cors = require('cors');
 //require APIs
 
 const BoardApi = require('./api/boards.api');
@@ -23,14 +23,11 @@ mongoose.connection.on('connected', () => {
 
 mongoose.connection.on('error', (err) => {
     if (err) {
-        console.log('error in connection is :' + err)
+        console.log('error in connection is :' + err);
     }
 });
 
-app.use(cors({
-    origin: config.CLIENT_ORIGIN,
-    credentials: true
-}));
+app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'build')));

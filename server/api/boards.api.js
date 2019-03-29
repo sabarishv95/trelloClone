@@ -35,7 +35,7 @@ router.get(config.findAllBoards, (req, res, next) => {
       }).then((boards) => {
         res.json(boards)
     }).catch((error) => {
-        next(error)
+        next(error);
     })
 });
 
@@ -60,9 +60,9 @@ router.get(config.findOneBoard, (req, res, next) => {
           }
         }
       }).then((board) => {
-        res.json(board)
+        res.json(board);
     }).catch((error) => {
-        next(error)
+        next(error);
     })
 });
 

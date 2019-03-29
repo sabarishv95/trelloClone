@@ -1,48 +1,149 @@
 .card-wrapper {
-    width: 100%;
-    border: 1px solid transparent;
-    border-radius: 3px;
-    .card {
-     background: white;
-     border: none;
-      cursor: pointer;
-      p {
-        word-wrap: break-word;
-      }
+  width: 100%;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  .card {
+    background: #fff;
+    border: none;
+    cursor: pointer;
+    p {
+      word-wrap: break-word;
     }
   }
-  .add-card { 
-    background: transparent; 
-    margin-top: 10px; 
-    cursor: pointer; 
-    border: 1px solid transparent; 
-    border-radius: 3px;
- 
-    p {  
-      span {  
-        margin-left: 10px;
-      }  
-    }
- 
-    &:hover {
-      background: rgba(9, 45, 66, 0.13);
-    }
-    .card-form {
-      display: flex;
-      flex-direction: column;
-      div {
-          display: flex;
-          flex-direction: row;
-          align-items: center;
-          .card-title, .card-description {
+  .modal {
+    .modal-dialog {
+      max-width: 80%;
+      .modal-content {
+        .modal-header {
+          position: relative;
+          & > div {
+            align-items: center;
+            display: flex;
+            & > .card-title {
+              width: 82.5%;
+              resize: none;
+              background-color: #e3e3e3;
+              border-color: transparent;
               border-radius: 3px;
+              text-decoration: none;
+              outline: none;
+              word-break: break-word;
+              &:focus {
+                border: 1px solid rgb(0, 106, 168);
+                background-color: #fff;
+              }
+            }
+            & > button {
+              outline: none;
+              position: absolute;
+              top: 0;
+              right: 0;
+              font-size: 24px;
+            }
           }
-          i {
-              font-size: 20px;
-              margin-left: 10px;
+          border-bottom: 1px solid #fff;
+        }
+        background: #e3e3e3;
+        .modal-body {
+          .card-section {
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid lightgray;
+            .card-description {
+              resize: none;
+              background-color: #fff;
+              border-color: transparent;
+              border-radius: 3px;
+              display: block;
+              min-height: 100px;
+              padding: 8px 12px;
+              text-decoration: none;
+              outline: none;
+              &:focus {
+                border: 1px solid rgb(0, 106, 168);
+                animation: heightIncrease 0.25s forwards;
+              }
+            }
           }
+          .actions-section {
+            position: relative;
+            .actions-btn-wrapper {
+              display: flex;
+              flex-direction: column;
+              .move-btn {
+                background-color: #ebeef0;
+              }
+            }
+            .delete-confirmation {
+              background: #fff;
+              border-radius: 3px;
+              width: 300px;
+              position: absolute;
+              right: 30px;
+              top: 135px;
+              box-shadow: 0 1px 2px -1px rgba(9, 45, 66, 0.25), 0 0 0 1px rgba(9, 45, 66, 0.08);
+              .delete-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                border-bottom: 1px solid #e3e3e3;
+                i {
+                  font-size: 20px;
+                  cursor: pointer;
+                }
+              }
+              .delete-content {
+                font-size: 14px;
+              }
+            }
+          }
+        }
       }
+    }
   }
+}
+.add-card {
+  background: transparent;
+  margin-top: 10px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  border-radius: 3px;
+
+  p {
+    span {
+      margin-left: 10px;
+    }
   }
-  
-   
+
+  &:hover {
+    background: rgba(9, 45, 66, 0.13);
+  }
+  .card-form {
+    display: flex;
+    flex-direction: column;
+    div {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      .card-title,
+      .card-description {
+        border-radius: 3px;
+        background: #fff;
+      }
+      i {
+        font-size: 20px;
+        margin-left: 10px;
+      }
+    }
+  }
+}
+
+@keyframes heightIncrease {
+  from {
+    min-height: 100px;
+  }
+
+  to {
+    min-height: 150px;
+  }
+}

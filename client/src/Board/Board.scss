@@ -1,18 +1,21 @@
 .board-wrapper {
-    background: rgb(0, 121, 191);
-    height: 100vh;
+  background: rgb(0, 121, 191);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  .board-name {
+    text-transform: capitalize;
+    color: #ffffff;
+  }
+  .board {
+    overflow-x: auto;
+    width: 100%;
+    flex-wrap: nowrap;
     display: flex;
-    flex-direction: column;
-    .board-name {
-        text-transform: capitalize;
-        color: #ffffff;
+    flex-flow: row;
+    flex-grow: 1;
+    .list-wrapper {
+      position: relative;
     }
-    .board {
-        overflow-x: auto;
-        width: 100%;
-        flex-wrap: nowrap;
-        display: flex;
-        flex-flow: row;
-        flex-grow: 1;
-    }
+  }
 }

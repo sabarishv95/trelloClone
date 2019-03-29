@@ -4,7 +4,7 @@ const config = require('../config');
 const Board = require('../models/boards.model');
 const List = require('../models/lists.model');
 const Card = require('../models/cards.model');
-const Comment = require('../models/comments.model')
+const Comment = require('../models/comments.model');
 
 //create a card with list id and update the list with the card id
 router.post(config.createCard, (req, res, next) => {
@@ -19,20 +19,22 @@ router.post(config.createCard, (req, res, next) => {
     }).catch((error) => {
         next(error);
     })
-})
+});
 
+//update a card with the provided title/description
 router.put(config.updateCard, (req, res, next) => {
     Card.findOneAndUpdate({ _id : req.params.id }, {
         $set: {
             ...req.body
         }
     }, { new : true } ).then((card) => {
-        res.json(card)
+        res.json(card);
     }).catch((error) => {
-        next(error)
+        next(error);
     })
-})
+});
 
+//delete card with the matching id
 router.delete(config.deleteCard, (req, res, next) => {
     Card.deleteOne({ _id: req.params.id }).then((cardDeleted) => {
         Comment.deleteMany({ card : req.params.id }).then((commentDeleted) => {
@@ -41,15 +43,15 @@ router.delete(config.deleteCard, (req, res, next) => {
                 list.save();
                 res.json(list);
             }).catch((error) => {
-                next(error)
+                next(error);
             })
         }).catch((error) => {
-            next(error)
+            next(error);
         })
     }).catch((error) => {
-        next(error)
+        next(error);
     })
-})
+});
 
 router.put(config.moveCard, (req, res, next) => {
     List.findById(req.params.fromList).then((fromList) => {
