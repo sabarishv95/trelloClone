@@ -20,24 +20,18 @@ export default class Comments extends Component {
   static contextType = AppContext;
 
   createComment() {
+    this.setState({ commentBody: "" });
     this.common
       .post(`/comment/createComment`, {
         body: this.state.commentBody,
         card: this.props.cardId
       })
       .then(response => {
-        this.setState(
-          {
-            commentBody: ""
-          },
-          () => {
-            this.common
-              .get(`/board/findBoard/${this.props.boardId}`)
-              .then(response => {
-                this.context.manageBoard(response.data);
-              });
-          }
-        );
+        this.common
+          .get(`/board/findBoard/${this.props.boardId}`)
+          .then(response => {
+            this.context.manageBoard(response.data);
+          });
       });
   }
 
@@ -78,9 +72,10 @@ export default class Comments extends Component {
           <div className="col-md-12 px-0 py-1 add-comment">
             {
               <div className="comment-form">
-                <h5 className="mt-2 mb-3 mx-0 font-weight-bold">Add Comment</h5>
+                <h5 className="my-3 mx-0 font-weight-bold">Add Comment</h5>
                 <Textarea
                   id="commentBody"
+                  name="commentBody"                  
                   className="comment-title"
                   placeholder="Enter comment body ..."
                   value={this.state.commentBody}
@@ -115,6 +110,7 @@ export default class Comments extends Component {
                     focus: this.state.saveComment
                   })}
                   id="editComment"
+                  name="editComment"
                   value={this.state.editComment}
                   onChange={this.common.handleChange.bind(this)}
                 />

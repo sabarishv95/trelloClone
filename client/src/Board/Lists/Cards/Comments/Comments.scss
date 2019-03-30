@@ -13,6 +13,7 @@
   .comment {
     span {
       @include comment;
+      display: inline-block;
     }
     .edit-comment {
       @include comment;

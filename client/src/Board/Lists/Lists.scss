@@ -44,6 +44,24 @@
         }
     }
   }
+
+  .all-lists {
+    button {
+      background: transparent;
+      width: 100%;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      text-align: left;
+      &:hover {
+        background: rgb(0, 106, 168);
+      }
+      &.current-list {
+        pointer-events: none;
+      }
+
+    }
+  }
 }
 
 .add-list {

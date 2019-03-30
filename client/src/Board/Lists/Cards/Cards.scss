@@ -50,6 +50,9 @@
           .card-section {
             display: flex;
             flex-direction: column;
+            p.description {
+              cursor: pointer;
+            }
             .card-description {
               resize: none;
               background-color: #fff;
@@ -63,14 +66,6 @@
               &.focus {
                 border: 1px solid rgb(0, 106, 168);
                 min-height: 150px;
-              }
-              &.hasDescription {
-                background-color: #e3e3e3;
-                word-break: break-word;
-                height: 30px !important;
-                min-height: 30px !important;
-                padding: 0;
-                cursor: pointer;
               }
             }
             .description-btn-wrapper {
@@ -95,6 +90,11 @@
               @include delete-wrapper;
               right: 30px;
               top: 155px;
+            }
+            .move-content {
+              @include delete-wrapper;
+              right: 15px;
+              top: 105px;
             }
           }
         }

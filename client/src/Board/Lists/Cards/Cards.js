@@ -10,10 +10,11 @@ export default class Cards extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      createCard: false,
       deleteCard: false,
       saveDescription: false,
       cancelSave: false,
+      moveCard: false,
+      toList: null,
       cardTitle: "",
       cardDescription: ""
     };
@@ -30,25 +31,15 @@ export default class Cards extends Component {
         list: this.props.listId
       })
       .then(response => {
-        this.setState(
-          prevState => {
-            return {
-              createCard: !prevState.createCard
-            };
-          },
-          () => {
-            this.common
-              .get(`/board/findBoard/${this.props.boardId}`)
-              .then(response => {
-                this.context.manageBoard(response.data);
-              });
-          }
-        );
+        this.common
+          .get(`/board/findBoard/${this.props.boardId}`)
+          .then(response => {
+            this.context.manageBoard(response.data);
+          });
       });
   }
 
   updateCard() {
-    console.log(this.state)
     setTimeout(() => {
       if (this.state.cardTitle && !this.state.cancelSave) {
         this.common
@@ -61,17 +52,18 @@ export default class Cards extends Component {
               .get(`/board/findBoard/${this.props.boardId}`)
               .then(response => {
                 this.context.manageBoard(response.data);
+                this.setState({ saveDescription: false });
               });
           });
       } else if (!this.state.cardTitle || this.state.cancelSave) {
-        console.log('not updating', this.props)
         this.setState({
           cardTitle: this.props.card.title,
-          cardDescription: this.props.card.description? this.props.card.description : ''
+          cardDescription: this.props.card.description
+            ? this.props.card.description
+            : ""
         });
       }
-      this.setState({ saveDescription: false });
-    }, 100);
+    }, 250);
   }
 
   deleteCard() {
@@ -86,8 +78,25 @@ export default class Cards extends Component {
       });
   }
 
+  moveCard() {
+    this.setState({ moveCard: false })
+    this.common
+      .put(
+        `/card/moveCard/${this.props.card._id}/${this.props.listId}/${
+          this.state.toList
+        }`
+      )
+      .then(response => {
+        this.common
+          .get(`/board/findBoard/${this.props.boardId}`)
+          .then(response => {
+            this.context.manageBoard(response.data);
+          });
+      });
+  }
+
   render() {
-    const { card, index, cardsLength, boardId } = this.props;
+    const { card, index, cardsLength, boardId, listId } = this.props;
     return (
       <React.Fragment>
         {card.length !== 0 && (
@@ -96,13 +105,14 @@ export default class Cards extends Component {
               className="col-md-12 p-2 card"
               data-toggle="modal"
               data-target={`#card${card._id}`}
-              onClick={() =>
+              onClick={() => {
                 this.setState({
                   cardTitle: card.title,
                   cardDescription: card.description,
                   deleteCard: false
-                })
-              }
+                });
+                this.context.manageBoard(null);
+              }}
             >
               <p className="m-0">{card.title}</p>
             </div>
@@ -116,9 +126,11 @@ export default class Cards extends Component {
                     <div className="col-12">
                       <Textarea
                         id="cardTitle"
+                        name="cardTitle"
                         className="card-title m-0"
                         value={this.state.cardTitle}
                         onChange={this.common.handleChange.bind(this)}
+                        onFocus={() => this.setState({ cancelSave: false })}
                         onBlur={this.updateCard.bind(this)}
                       />
                       <button
@@ -135,22 +147,42 @@ export default class Cards extends Component {
                     <div className="col-12 col-sm-12 col-md-10 card-section">
                       <h5 className="my-3 mx-0 font-weight-bold">
                         Description
+                        {card.description && <small style={{ fontSize: "14px", fontWeight: "500", paddingLeft: '10px' }}>
+                          (Click on the description to edit)
+                        </small>}
                       </h5>
-                      <Textarea
-                        id="cardDescription"
-                        className={classnames({
-                          "card-description": true,
-                          hasDescription:
-                            this.state.cardDescription &&
-                            !this.state.saveDescription,
-                          focus: this.state.saveDescription
-                        })}
-                        placeholder="Add a more detailed description ..."
-                        value={this.state.cardDescription}
-                        onChange={this.common.handleChange.bind(this)}
-                        onFocus={() => this.setState({ saveDescription: true })}
-                        onBlur={this.updateCard.bind(this)}
-                      />
+                      {!this.state.saveDescription && (
+                        <p
+                          className="m-0 description"
+                          onClick={() =>
+                            this.setState({
+                              saveDescription: true,
+                              cancelSave: false
+                            })
+                          }
+                        >
+                          {card.description}
+                        </p>
+                      )}
+                      {(this.state.saveDescription ||
+                        !this.props.card.description) && (
+                        <Textarea
+                          autoFocus={true}
+                          id="cardDescription"
+                          name="cardDescription"
+                          className={classnames({
+                            "card-description": true,
+                            focus: this.state.saveDescription
+                          })}
+                          placeholder="Add a more detailed description ..."
+                          value={this.state.cardDescription}
+                          onChange={this.common.handleChange.bind(this)}
+                          onFocus={() =>
+                            this.setState({ saveDescription: true })
+                          }
+                          onBlur={this.updateCard.bind(this)}
+                        />
+                      )}
                       {this.state.saveDescription && (
                         <div className="description-btn-wrapper mt-2">
                           <button
@@ -166,8 +198,8 @@ export default class Cards extends Component {
                             className="fas fa-times ml-3"
                             onClick={() =>
                               this.setState({
-                                saveDescription: false,
-                                cancelSave: true
+                                cancelSave: true,
+                                saveDescription: false
                               })
                             }
                           />
@@ -196,18 +228,74 @@ export default class Cards extends Component {
                     <div className="col-12 col-sm-12 col-md-2 actions-section">
                       <h5 className="font-weight-bold my-3">Actions</h5>
                       <div className="actions-btn-wrapper">
-                        <button className="move-btn btn mb-3">Move</button>
+                        <button
+                          className="move-btn btn mb-3"
+                          onClick={() =>
+                            this.setState(prevState => {
+                              return {
+                                moveCard: !prevState.moveCard,
+                                deleteCard: false
+                              };
+                            })
+                          }
+                        >
+                          Move
+                        </button>
                         <button
                           className="delete-btn btn btn-danger"
                           onClick={() =>
                             this.setState(prevState => {
-                              return { deleteCard: !prevState.deleteCard };
+                              return {
+                                deleteCard: !prevState.deleteCard,
+                                moveCard: false
+                              };
                             })
                           }
                         >
                           Delete
                         </button>
                       </div>
+                      {this.state.moveCard && (
+                        <div className="move-content">
+                          <div className="col-12 delete-header mb-3 p-2">
+                            <p className="m-0 font-weight-light text-center">
+                              Move Card
+                            </p>
+                            <i
+                              className="fas fa-times"
+                              onClick={() =>
+                                this.setState(prevState => {
+                                  return { moveCard: !prevState.moveCard };
+                                })
+                              }
+                            />
+                          </div>
+                          <div className="col-12 mb-3">
+                            <select
+                              id="toList"
+                              name="toList"
+                              onChange={this.common.handleChange.bind(this)}
+                            >
+                              <option defaultValue="Choose a list">Choose a list</option>
+                              {this.context.currentBoard.lists.map(list => (
+                                <option key={list._id} value={list._id}>
+                                  {list.title}
+                                  {list._id !== listId ? null : " (current)"}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                          <div className="col-12 pb-2">
+                            <button
+                              className="btn btn-success w-100"
+                              data-dismiss="modal"
+                              onClick={this.moveCard.bind(this)}
+                            >
+                              Move
+                            </button>
+                          </div>
+                        </div>
+                      )}
                       {this.state.deleteCard && (
                         <div className="delete-confirmation row">
                           <div className="col-12 delete-header mb-3 p-2">
@@ -250,24 +338,24 @@ export default class Cards extends Component {
         )}
         {index === cardsLength - 1 && (
           <div className="col-md-12 px-0 py-1 add-card">
-            {!this.state.createCard && (
+            {this.context.createCard !== listId && (
               <p
                 className="m-0"
-                onClick={() =>
-                  this.setState(prevState => {
-                    return { createCard: !prevState.createCard, cardTitle: "" };
-                  })
-                }
+                onClick={() => {
+                  this.context.manageBoard(listId);
+                  this.setState({ cardTitle: "" });
+                }}
               >
                 <i className="fas fa-plus" />
                 <span>Add card</span>
               </p>
             )}
-            {this.state.createCard && (
+            {this.context.createCard === listId && (
               <div className="mt-3 card-form">
                 <input
                   type="text"
                   id="cardTitle"
+                  name="cardTitle"
                   className="card-title d-block"
                   placeholder="Enter card title"
                   value={this.state.cardTitle}
@@ -283,11 +371,7 @@ export default class Cards extends Component {
                   </button>
                   <i
                     className="mt-2 fas fa-times"
-                    onClick={() =>
-                      this.setState(prevState => {
-                        return { createCard: !prevState.createCard };
-                      })
-                    }
+                    onClick={() => this.context.manageBoard(null)}
                   />
                 </div>
               </div>

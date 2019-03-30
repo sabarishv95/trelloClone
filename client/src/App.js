@@ -10,14 +10,21 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 class App extends Component {
   state = {
-    currentBoard: null
+    currentBoard: null,
+    createCard: null
   };
   static contextType = AppContext;
 
-  manageBoard(board) {
-    this.setState({
-      currentBoard: board
-    });
+  manageBoard(data) {
+    if (typeof data === 'object' && data) {
+      this.setState({
+        currentBoard: data,
+        createCard: null
+      });
+    }
+    else {
+      this.setState({ createCard: data })
+    }
   }
 
   render() {
@@ -27,7 +34,8 @@ class App extends Component {
           <AppContext.Provider
             value={{
               currentBoard: this.state.currentBoard,
-              manageBoard: this.manageBoard.bind(this)
+              manageBoard: this.manageBoard.bind(this),
+              createCard: this.state.createCard
             }}
           >
             <Switch>

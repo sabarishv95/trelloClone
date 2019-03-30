@@ -65,7 +65,7 @@ class Common {
     handleChange(e) {
         e.persist();
         this.setState({
-            [e.target.id]: e.target.value
+            [e.target.name]: e.target.value
         });
     }
 }

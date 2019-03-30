@@ -2,53 +2,62 @@ import React, { Component } from "react";
 import "./Lists.scss";
 import Cards from "./Cards/Cards";
 import AppContext from "../../App.context";
-import Common from '../../Common';
+import Common from "../../Common";
 
 class Lists extends Component {
   constructor(props) {
     super(props);
     this.state = {
       createList: false,
-      listTitle: "",
-      editList: false
+      editList: false,
+      moveAllCards: false,
+      listTitle: ""
     };
     this.deleteList = this.deleteList.bind(this);
-    this.common = new Common()
+    this.moveAllCards = this.moveAllCards.bind(this);
+    this.common = new Common();
   }
 
   static contextType = AppContext;
 
   createList() {
-    this.common.post(`/list/createList`, { title: this.state.listTitle, board: this.props.boardId }).then(response => {
-      this.setState({
-        listTitle: "",
-        createList: false
-      }, () => {
-        this.common.get(`/board/findBoard/${this.props.boardId}`).then(response => {
-          this.context.manageBoard(response.data);
-        });
+    this.common
+      .post(`/list/createList`, {
+        title: this.state.listTitle,
+        board: this.props.boardId
+      })
+      .then(response => {
+        this.common
+          .get(`/board/findBoard/${this.props.boardId}`)
+          .then(response => {
+            this.context.manageBoard(response.data);
+          });
       });
-    });
   }
 
   deleteList(id) {
-    this.common.delete(`/list/deleteList/${id}/${this.props.boardId}`).then(response => {
-      this.setState({
-        editList: false
-      }, () => {
-        this.common.get(`/board/findBoard/${this.props.boardId}`).then(response => {
-          this.context.manageBoard(response.data);
-        });
+    this.common
+      .delete(`/list/deleteList/${id}/${this.props.boardId}`)
+      .then(response => {
+        this.common
+          .get(`/board/findBoard/${this.props.boardId}`)
+          .then(response => {
+            this.context.manageBoard(response.data);
+          });
       });
-    });
   }
 
-  closeList(e) {
-    e.persist();
-    e.stopPropagation()
-    this.setState(prevState => {
-      return { createList: !prevState.createList };
-    });
+  moveAllCards(id) {
+    this.common
+      .put(`/card/moveAllCards/${this.props.list._id}/${id}`)
+      .then(response => {
+        this.common
+          .get(`/board/findBoard/${this.props.boardId}`)
+          .then(response => {
+            this.context.manageBoard(response.data);
+            this.setState({ moveAllCards: false, editList: false });
+          });
+      });
   }
 
   render() {
@@ -61,39 +70,111 @@ class Lists extends Component {
               <p className="m-0 ml-3 m-0 list-title">{list.title}</p>
               <i
                 className="fa fa-ellipsis-h"
-                onClick={() =>
+                onClick={() => {
                   this.setState(prevState => {
-                    return { editList: !prevState.editList };
-                  })
-                }
+                    return {
+                      editList: !prevState.editList,
+                      moveAllCards: false
+                    };
+                  });
+                }}
               />
             </div>
             {this.state.editList && (
               <div className="list-actions-wrapper">
                 <div className="list-actions-header">
-                  <p className="font-weight-bold ml-2 mr-0 my-0 py-2 list-actions-heading">
-                    List Actions
-                  </p>
+                  {!this.state.moveAllCards && (
+                    <p className="font-weight-bold ml-2 mr-0 my-0 py-2 list-actions-heading">
+                      List Actions
+                    </p>
+                  )}
+                  {this.state.moveAllCards && (
+                    <React.Fragment>
+                      <i
+                        className="fas fa-arrow-left ml-2"
+                        onClick={() =>
+                          this.setState(prevState => {
+                            return { moveAllCards: !prevState.moveAllCards };
+                          })
+                        }
+                      />
+                      <p className="font-weight-bold ml-2 mr-0 my-0 py-2 list-actions-heading">
+                        Move all cards
+                      </p>
+                    </React.Fragment>
+                  )}
                   <i
                     className="mr-2 fas fa-times"
                     onClick={() =>
                       this.setState(prevState => {
-                        return { editList: !prevState.editList };
+                        return {
+                          editList: !prevState.editList,
+                          moveAllCards: !prevState.moveAllCards
+                        };
                       })
                     }
                   />
                 </div>
-                <div className="list-actions">
-                  <p className="ml-2 mb-1 mt-1 font-weight-normal">
-                    Add Card ...
-                  </p>
-                  <p
-                    className="ml-2 mb-1 font-weight-normal"
-                    onClick={() => this.deleteList(list._id)}
-                  >
-                    Delete list ...
-                  </p>
-                </div>
+                {!this.state.moveAllCards && (
+                  <div className="list-actions">
+                    <p
+                      className="ml-2 mb-1 mt-1 font-weight-normal"
+                      onClick={() => {
+                        this.context.manageBoard(list._id);
+                        this.setState(prevState => {
+                          return { editList: !prevState.editList };
+                        });
+                      }}
+                    >
+                      Add Card ...
+                    </p>
+                    {list.cards.length !== 0 && (
+                      <p
+                        className="ml-2 mb-1 mt-1 font-weight-normal"
+                        onClick={() => {
+                          this.setState(prevState => {
+                            return { moveAllCards: !prevState.moveAllCards };
+                          });
+                        }}
+                      >
+                        Move all cards in this list
+                      </p>
+                    )}
+                    <p
+                      className="ml-2 mb-1 font-weight-normal"
+                      onClick={() => this.deleteList(list._id)}
+                    >
+                      Delete list ...
+                    </p>
+                  </div>
+                )}
+                {this.state.moveAllCards && (
+                  <div className="all-lists">
+                    {this.context.currentBoard.lists.map(list => {
+                      return (
+                        <React.Fragment key={list._id}>
+                          {list._id === this.props.list._id && (
+                            <button
+                              className="p-2 current-list"
+                              disabled={true}
+                              value={`${list._id} (current)`}
+                            >
+                              {list.title}
+                            </button>
+                          )}
+                          {list._id !== this.props.list._id && (
+                            <button
+                              className="p-2"
+                              onClick={() => this.moveAllCards(list._id)}
+                            >
+                              {list.title}
+                            </button>
+                          )}
+                        </React.Fragment>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             )}
             {list.cards.length !== 0 &&
@@ -124,7 +205,7 @@ class Lists extends Component {
             className="d-inline-block add-list p-2"
             onClick={() =>
               this.setState(prevState => {
-                return { createList: !prevState.createList };
+                return { createList: !prevState.createList, listTitle: "" };
               })
             }
           >
@@ -138,6 +219,7 @@ class Lists extends Component {
                 <input
                   type="text"
                   id="listTitle"
+                  name="listTitle"
                   className="list-title"
                   placeholder="Enter list title"
                   value={this.state.listTitle}
@@ -154,7 +236,13 @@ class Lists extends Component {
                   </button>
                   <i
                     className="mt-2 fas fa-times"
-                    onClick={() => this.closeList.bind(this)}
+                    onClick={e => {
+                      e.persist();
+                      e.stopPropagation();
+                      this.setState(prevState => {
+                        return { createList: !prevState.createList };
+                      });
+                    }}
                   />
                 </div>
               </div>

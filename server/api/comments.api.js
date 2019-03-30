@@ -1,8 +1,6 @@
 const express = require("express");
 const router =  express.Router();
 const config = require('../config');
-const Board = require('../models/boards.model');
-const List = require('../models/lists.model');
 const Card = require('../models/cards.model');
 const Comment = require('../models/comments.model');
 

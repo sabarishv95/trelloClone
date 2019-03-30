@@ -9,6 +9,7 @@ var config = {
   createCard: '/createCard',
   updateCard: '/updateCard/:id',
   moveCard: '/moveCard/:id/:fromList/:toList',
+  moveAllCards: '/moveAllCards/:fromList/:toList',
   deleteCard: '/deleteCard/:id/:listId',
   createComment: '/createComment',
   updateComment: '/updateComment/:id',

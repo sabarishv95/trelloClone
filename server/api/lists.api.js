@@ -7,17 +7,13 @@ const Card = require("../models/cards.model");
 const Comment = require("../models/comments.model");
 
 const deleteComments = (list, boardId, next, res) => {
-  for (let i = 0; i < list.cards.length; i++) {
-    Comment.deleteMany({ card: list.cards[i] })
-      .then(comment => {
-        if (i === list.cards.length - 1) {
-          deleteListsFromBoard(boardId, list._id, next, res);
-        }
-      })
-      .catch(error => {
-        next(error);
-      });
-  }
+  Comment.deleteMany({ card: { $in: list.cards } })
+    .then(comment => {
+      deleteListsFromBoard(boardId, list._id, next, res);
+    })
+    .catch(error => {
+      next(error);
+    });
 };
 
 const deleteListsFromBoard = (boardId, listId, next, res) => {
@@ -32,6 +28,7 @@ const deleteListsFromBoard = (boardId, listId, next, res) => {
       next(error);
     });
 };
+
 //create a list with board id and update the board with the list id
 router.post(config.createList, (req, res, next) => {
   List.create(req.body)
@@ -53,25 +50,19 @@ router.post(config.createList, (req, res, next) => {
 
 //delete a list with id and delete that list from board
 router.delete(config.deleteList, (req, res, next) => {
-  List.findById(req.params.id)
+  List.findOneAndDelete({ _id: req.params.id })
     .then(list => {
-      List.deleteOne({ _id: req.params.id })
-        .then(response => {
-          Card.deleteMany({ list: req.params.id })
-            .then(card => {
-              if (list.cards.length !== 0) {
-                deleteComments(list, req.params.boardId, next, res);
-              } else {
-                deleteListsFromBoard(req.params.boardId, req.params.id, next, res);
-              }
-            })
-            .catch(error => {
-              next(error);
-            });
-        })
-        .catch(error => {
-          next(error);
-        });
+      if (list.cards.length !== 0) {
+        Card.deleteMany({ _id: { $in: list.cards } })
+          .then(card => {
+            deleteComments(list, req.params.boardId, next, res);
+          })
+          .catch(error => {
+            next(error);
+          });
+      } else {
+        deleteListsFromBoard(req.params.boardId, req.params.id, next, res);
+      }
     })
     .catch(error => {
       next(error);

@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import "./Boards.scss";
 import AppContext from "../App.context";
-import Common from '../Common'
+import Common from "../Common";
 
 export default class Boards extends Component {
   constructor(props) {
@@ -11,7 +11,7 @@ export default class Boards extends Component {
       boardName: ""
     };
     this.goToBoard = this.goToBoard.bind(this);
-    this.common = new Common()
+    this.common = new Common();
   }
   static contextType = AppContext;
 
@@ -29,19 +29,17 @@ export default class Boards extends Component {
   }
 
   createBoard() {
-    this.common.post(`/board/createBoard`, { name: this.state.boardName }).then(response => {
-      this.setState(
-        prevState => {
+    this.common
+      .post(`/board/createBoard`, { name: this.state.boardName })
+      .then(response => {
+        this.setState(prevState => {
           return {
             boards: [...prevState.boards, response.data]
           };
-        },
-        () => {
-          this.context.manageBoard(response.data);
-          this.props.history.push(`/board/${response.data._id}`);
-        }
-      );
-    });
+        });
+        this.context.manageBoard(response.data);
+        this.props.history.push(`/board/${response.data._id}`);
+      });
   }
 
   render() {
@@ -96,6 +94,7 @@ export default class Boards extends Component {
                   <input
                     type="text"
                     id="boardName"
+                    name="boardName"
                     className="board-name"
                     placeholder="Enter board name"
                     value={this.state.boardName}
