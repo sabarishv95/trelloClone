@@ -33,4 +33,16 @@ router.put(config.updateComment, (req, res, next) => {
     })
 });
 
+router.delete(config.deleteComment, (req, res, next) => {
+    Comment.deleteOne({ _id: req.params.id}).then((comment) => {
+        Card.findById(req.params.cardId).then((card) => {
+            if(card.comments.indexOf(comment._id) >=0 ) card.comments.splice(card.comments.indexOf(comment._id), 1);
+            card.save();
+            res.json(comment);
+        })
+    }).catch((error) => {
+        next(error)
+    })
+});
+
 module.exports = router;

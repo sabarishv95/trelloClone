@@ -11,7 +11,8 @@ var config = {
   moveCard: '/moveCard/:id/:fromList/:toList',
   deleteCard: '/deleteCard/:id/:listId',
   createComment: '/createComment',
-  updateComment: '/updateComment/:id'
+  updateComment: '/updateComment/:id',
+  deleteComment: '/deleteComment/:id/:cardId'
 };
 
 module.exports = config;

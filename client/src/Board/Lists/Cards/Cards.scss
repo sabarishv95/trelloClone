@@ -1,3 +1,5 @@
+@import '../../../App.scss';
+
 .card-wrapper {
   width: 100%;
   border: 1px solid transparent;
@@ -48,7 +50,6 @@
           .card-section {
             display: flex;
             flex-direction: column;
-            border-right: 1px solid lightgray;
             .card-description {
               resize: none;
               background-color: #fff;
@@ -59,9 +60,25 @@
               padding: 8px 12px;
               text-decoration: none;
               outline: none;
-              &:focus {
+              &.focus {
                 border: 1px solid rgb(0, 106, 168);
-                animation: heightIncrease 0.25s forwards;
+                min-height: 150px;
+              }
+              &.hasDescription {
+                background-color: #e3e3e3;
+                word-break: break-word;
+                height: 30px !important;
+                min-height: 30px !important;
+                padding: 0;
+                cursor: pointer;
+              }
+            }
+            .description-btn-wrapper {
+              display: flex;
+              align-items: center;
+              i {
+                font-size: 20px;
+                cursor: pointer;
               }
             }
           }
@@ -75,26 +92,9 @@
               }
             }
             .delete-confirmation {
-              background: #fff;
-              border-radius: 3px;
-              width: 300px;
-              position: absolute;
+              @include delete-wrapper;
               right: 30px;
-              top: 135px;
-              box-shadow: 0 1px 2px -1px rgba(9, 45, 66, 0.25), 0 0 0 1px rgba(9, 45, 66, 0.08);
-              .delete-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                border-bottom: 1px solid #e3e3e3;
-                i {
-                  font-size: 20px;
-                  cursor: pointer;
-                }
-              }
-              .delete-content {
-                font-size: 14px;
-              }
+              top: 155px;
             }
           }
         }
@@ -135,15 +135,5 @@
         margin-left: 10px;
       }
     }
-  }
-}
-
-@keyframes heightIncrease {
-  from {
-    min-height: 100px;
-  }
-
-  to {
-    min-height: 150px;
   }
 }

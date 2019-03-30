@@ -3,16 +3,19 @@ import "./Cards.scss";
 import Comments from "./Comments/Comments";
 import AppContext from "../../../App.context";
 import Textarea from "react-textarea-autosize";
-import Common from '../../../Common';
+import Common from "../../../Common";
+import classnames from "classnames";
 
 export default class Cards extends Component {
   constructor(props) {
     super(props);
     this.state = {
       createCard: false,
+      deleteCard: false,
+      saveDescription: false,
+      cancelSave: false,
       cardTitle: "",
-      cardDescription: "",
-      deleteCard: false
+      cardDescription: ""
     };
 
     this.common = new Common();
@@ -21,33 +24,66 @@ export default class Cards extends Component {
   static contextType = AppContext;
 
   createCard() {
-    this.common.post(`/card/createCard/`, { title: this.state.cardTitle, list: this.props.listId }).then(response => {
-      this.setState(
-        prevState => {
-          return {
-            cardTitle: "",
-            createCard: !prevState.createCard
-          };
-        },
-        () => {
-          this.common.get(`/board/findBoard/${this.props.boardId}`).then(response => {
-            this.context.manageBoard(response.data);
-          });
-        }
-      );
-    });
+    this.common
+      .post(`/card/createCard/`, {
+        title: this.state.cardTitle,
+        list: this.props.listId
+      })
+      .then(response => {
+        this.setState(
+          prevState => {
+            return {
+              createCard: !prevState.createCard
+            };
+          },
+          () => {
+            this.common
+              .get(`/board/findBoard/${this.props.boardId}`)
+              .then(response => {
+                this.context.manageBoard(response.data);
+              });
+          }
+        );
+      });
   }
 
   updateCard() {
-    console.log(this.state.cardDescription);
+    console.log(this.state)
+    setTimeout(() => {
+      if (this.state.cardTitle && !this.state.cancelSave) {
+        this.common
+          .put(`/card/updateCard/${this.props.card._id}`, {
+            title: this.state.cardTitle,
+            description: this.state.cardDescription
+          })
+          .then(response => {
+            this.common
+              .get(`/board/findBoard/${this.props.boardId}`)
+              .then(response => {
+                this.context.manageBoard(response.data);
+              });
+          });
+      } else if (!this.state.cardTitle || this.state.cancelSave) {
+        console.log('not updating', this.props)
+        this.setState({
+          cardTitle: this.props.card.title,
+          cardDescription: this.props.card.description? this.props.card.description : ''
+        });
+      }
+      this.setState({ saveDescription: false });
+    }, 100);
   }
 
   deleteCard() {
-    this.common.delete(`/card/deleteCard//${this.props.card._id}/${this.props.listId}`).then(response => {
-      this.common.get(`/board/findBoard/${this.props.boardId}`).then(response => {
-        this.context.manageBoard(response.data);
+    this.common
+      .delete(`/card/deleteCard/${this.props.card._id}/${this.props.listId}`)
+      .then(response => {
+        this.common
+          .get(`/board/findBoard/${this.props.boardId}`)
+          .then(response => {
+            this.context.manageBoard(response.data);
+          });
       });
-    });
   }
 
   render() {
@@ -83,6 +119,7 @@ export default class Cards extends Component {
                         className="card-title m-0"
                         value={this.state.cardTitle}
                         onChange={this.common.handleChange.bind(this)}
+                        onBlur={this.updateCard.bind(this)}
                       />
                       <button
                         type="button"
@@ -101,22 +138,41 @@ export default class Cards extends Component {
                       </h5>
                       <Textarea
                         id="cardDescription"
-                        className="card-description"
+                        className={classnames({
+                          "card-description": true,
+                          hasDescription:
+                            this.state.cardDescription &&
+                            !this.state.saveDescription,
+                          focus: this.state.saveDescription
+                        })}
                         placeholder="Add a more detailed description ..."
                         value={this.state.cardDescription}
                         onChange={this.common.handleChange.bind(this)}
+                        onFocus={() => this.setState({ saveDescription: true })}
+                        onBlur={this.updateCard.bind(this)}
                       />
-                      <div>
-                        <button
-                          className="btn btn-success mt-2"
-                          onClick={this.updateCard.bind(this)}
-                          disabled={
-                            !this.state.cardDescription ? true : false
-                          }
-                        >
-                          Save
-                        </button>
-                      </div>
+                      {this.state.saveDescription && (
+                        <div className="description-btn-wrapper mt-2">
+                          <button
+                            className="btn btn-success"
+                            onClick={this.updateCard.bind(this)}
+                            disabled={
+                              !this.state.cardDescription ? true : false
+                            }
+                          >
+                            Save
+                          </button>
+                          <i
+                            className="fas fa-times ml-3"
+                            onClick={() =>
+                              this.setState({
+                                saveDescription: false,
+                                cancelSave: true
+                              })
+                            }
+                          />
+                        </div>
+                      )}
                       {card.comments.length !== 0 &&
                         card.comments.map((comment, index) => (
                           <Comments
@@ -138,29 +194,53 @@ export default class Cards extends Component {
                       )}
                     </div>
                     <div className="col-12 col-sm-12 col-md-2 actions-section">
-                      <h5 className="font-weight-bold">Actions</h5>
+                      <h5 className="font-weight-bold my-3">Actions</h5>
                       <div className="actions-btn-wrapper">
                         <button className="move-btn btn mb-3">Move</button>
-                        <button className="delete-btn btn btn-danger" onClick={() => this.setState(prevState => { return { deleteCard: !prevState.deleteCard } })}>
+                        <button
+                          className="delete-btn btn btn-danger"
+                          onClick={() =>
+                            this.setState(prevState => {
+                              return { deleteCard: !prevState.deleteCard };
+                            })
+                          }
+                        >
                           Delete
                         </button>
                       </div>
-                      {this.state.deleteCard && <div className="delete-confirmation row">
-                        <div className="col-12 delete-header mb-3 p-2">
-                          <p className="m-0 font-weight-light">Delete Card?</p>
-                          <i className="fas fa-times" onClick={() => this.setState(prevState => { return { deleteCard: !prevState.deleteCard } })} />
+                      {this.state.deleteCard && (
+                        <div className="delete-confirmation row">
+                          <div className="col-12 delete-header mb-3 p-2">
+                            <p className="m-0 font-weight-light">
+                              Delete Card?
+                            </p>
+                            <i
+                              className="fas fa-times"
+                              onClick={() =>
+                                this.setState(prevState => {
+                                  return { deleteCard: !prevState.deleteCard };
+                                })
+                              }
+                            />
+                          </div>
+                          <div className="col-12 mb-3">
+                            <p className="m-0 delete-content">
+                              All actions will be removed from the activity feed
+                              and you won’t be able to re-open the card. There
+                              is no undo.
+                            </p>
+                          </div>
+                          <div className="col-12 pb-2">
+                            <button
+                              className="btn btn-danger w-100"
+                              data-dismiss="modal"
+                              onClick={this.deleteCard.bind(this)}
+                            >
+                              Delete
+                            </button>
+                          </div>
                         </div>
-                        <div className="col-12 mb-3">
-                          <p className="m-0 delete-content">
-                            All actions will be removed from the activity feed
-                            and you won’t be able to re-open the card. There is
-                            no undo.
-                          </p>
-                        </div>
-                        <div className="col-12 pb-2">
-                          <button className="btn btn-danger w-100" data-dismiss="modal" onClick={this.deleteCard.bind(this)}>Delete</button>
-                        </div>
-                      </div>}
+                      )}
                     </div>
                   </div>
                 </div>
@@ -175,7 +255,7 @@ export default class Cards extends Component {
                 className="m-0"
                 onClick={() =>
                   this.setState(prevState => {
-                    return { createCard: !prevState.createCard };
+                    return { createCard: !prevState.createCard, cardTitle: "" };
                   })
                 }
               >

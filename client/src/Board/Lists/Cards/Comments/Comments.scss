@@ -1,10 +1,56 @@
+@import '../../../../App.scss';
+
+@mixin comment {
+  background: #fff;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  box-shadow: 0 1px 2px -1px rgba(9, 45, 66, 0.25),
+    0 0 0 1px rgba(9, 45, 66, 0.08);
+}
+
 .comments-wrapper {
+  border-bottom: 1px solid #fff;
   .comment {
-    background: #fff;
-    border: 1px solid transparent;
-    border-radius: 3px;
-    box-shadow: 0 1px 2px -1px rgba(9, 45, 66, 0.25),
-      0 0 0 1px rgba(9, 45, 66, 0.08);
+    span {
+      @include comment;
+    }
+    .edit-comment {
+      @include comment;
+      resize: none;
+      background-color: #fff;
+      border-color: transparent;
+      border-radius: 3px;
+      display: block;
+      min-height: 30px;
+      padding: 8px 12px;
+      text-decoration: none;
+      outline: none;
+      pointer-events: none;
+      &.focus {
+        pointer-events: all;
+        min-height: 100px;
+        width: 100%;
+      }
+    }
+  }
+  .comment-actions {
+    span {
+      font-size: 14px;
+      color: gray;
+      &:nth-child(odd) {
+        text-decoration: underline;
+        cursor: pointer;
+      }
+    }
+  }
+
+  .comments-btn-wrapper {
+    display: flex;
+    align-items: center;
+    i {
+      font-size: 20px;
+      cursor: pointer;
+    }
   }
 
   .add-comment {
@@ -36,5 +82,10 @@
         }
       }
     }
+  }
+
+  .delete-comment-confirmation {
+    @include delete-wrapper;
+    left: 30px;
   }
 }

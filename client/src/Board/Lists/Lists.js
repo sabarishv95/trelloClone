@@ -60,7 +60,7 @@ class Lists extends Component {
             <div className="list-title-wrapper">
               <p className="m-0 ml-3 m-0 list-title">{list.title}</p>
               <i
-                className="fas fa-ellipsis-v"
+                className="fa fa-ellipsis-h"
                 onClick={() =>
                   this.setState(prevState => {
                     return { editList: !prevState.editList };

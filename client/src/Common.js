@@ -47,6 +47,21 @@ class Common {
         })
     }
 
+    put(url, body) {
+        return new Promise((resolve, reject) => {
+            axios
+                .put(url, body, {
+                    header: {
+                        "content-type": "application/json"
+                    }
+                }).then((response) => {
+                    resolve(response)
+                }).catch((error) => {
+                    reject(error)
+                })
+        })
+    }
+
     handleChange(e) {
         e.persist();
         this.setState({
