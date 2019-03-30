@@ -7,23 +7,25 @@ import AppContext from "./App.context";
 import "jquery/dist/jquery.min.js";
 import "bootstrap/dist/js/bootstrap.min.js";
 import "bootstrap/dist/css/bootstrap.min.css";
+import HTML5Backend from "react-dnd-html5-backend";
+import { DragDropContext } from "react-dnd";
 
 class App extends Component {
   state = {
     currentBoard: null,
-    createCard: null
+    createCard: null,
+    dropList: null
   };
   static contextType = AppContext;
 
   manageBoard(data) {
-    if (typeof data === 'object' && data) {
+    if (typeof data === "object" && data) {
       this.setState({
         currentBoard: data,
         createCard: null
       });
-    }
-    else {
-      this.setState({ createCard: data })
+    } else {
+      this.setState({ createCard: data });
     }
   }
 
@@ -35,7 +37,8 @@ class App extends Component {
             value={{
               currentBoard: this.state.currentBoard,
               manageBoard: this.manageBoard.bind(this),
-              createCard: this.state.createCard
+              createCard: this.state.createCard,
+              dropList: this.state.dropList
             }}
           >
             <Switch>
@@ -49,4 +52,4 @@ class App extends Component {
   }
 }
 
-export default App;
+export default DragDropContext(HTML5Backend)(App);

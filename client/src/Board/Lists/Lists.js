@@ -3,6 +3,14 @@ import "./Lists.scss";
 import Cards from "./Cards/Cards";
 import AppContext from "../../App.context";
 import Common from "../../Common";
+import { DropTarget } from "react-dnd";
+
+function collect(connect, monitor) {
+  return {
+    connectDropTarget: connect.dropTarget(),
+    hovered: monitor.isOver(),
+  };
+}
 
 class Lists extends Component {
   constructor(props) {
@@ -15,6 +23,7 @@ class Lists extends Component {
     };
     this.deleteList = this.deleteList.bind(this);
     this.moveAllCards = this.moveAllCards.bind(this);
+    this.moveCard = this.moveCard.bind(this);
     this.common = new Common();
   }
 
@@ -60,10 +69,33 @@ class Lists extends Component {
       });
   }
 
+  moveCard(card, listId) {
+    // drop()
+    this.common
+      .put(
+        `/card/moveCard/${card._id}/${card.list}/${
+          listId
+        }`
+      )
+      .then(response => {
+        this.common
+          .get(`/board/findBoard/${this.props.boardId}`)
+          .then(response => {
+            this.context.manageBoard(response.data);
+          });
+      });
+  }
+
   render() {
-    const { list, index, listLength, boardId } = this.props;
-    return (
-      <React.Fragment>
+    const {
+      list,
+      index,
+      listLength,
+      boardId,
+      connectDropTarget
+    } = this.props;
+    return connectDropTarget(
+      <div>
         {list.length !== 0 && (
           <div className="d-inline-block list mr-3 p-2">
             <div className="list-title-wrapper">
@@ -186,6 +218,7 @@ class Lists extends Component {
                   cardsLength={list.cards.length}
                   boardId={boardId}
                   listId={list._id}
+                  handleDrop={(card, listId) => this.moveCard(card,listId)}
                 />
               ))}
             {list.cards.length === 0 && (
@@ -249,9 +282,13 @@ class Lists extends Component {
             )}
           </div>
         )}
-      </React.Fragment>
+      </div>
     );
   }
 }
 
-export default Lists;
+export default DropTarget("cards", {
+  drop({ list }) {
+    return { list };
+  },
+}, collect)(Lists);

@@ -5,8 +5,30 @@ import AppContext from "../../../App.context";
 import Textarea from "react-textarea-autosize";
 import Common from "../../../Common";
 import classnames from "classnames";
+import { DragSource } from "react-dnd";
 
-export default class Cards extends Component {
+const itemSource = {
+  beginDrag(props) {
+    return props.card;
+  },
+  endDrag(props, monitor, component) {
+    if (!monitor.didDrop()) {
+      return;
+    }
+
+    return props.handleDrop(props.card, monitor.getDropResult().list._id);
+  }
+};
+
+function collect(connect, monitor) {
+  return {
+    connectDragSource: connect.dragSource(),
+    connectDragPreview: connect.dragPreview(),
+    isDragging: monitor.isDragging()
+  };
+}
+
+class Cards extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -79,7 +101,7 @@ export default class Cards extends Component {
   }
 
   moveCard() {
-    this.setState({ moveCard: false })
+    this.setState({ moveCard: false });
     this.common
       .put(
         `/card/moveCard/${this.props.card._id}/${this.props.listId}/${
@@ -96,9 +118,10 @@ export default class Cards extends Component {
   }
 
   render() {
-    const { card, index, cardsLength, boardId, listId } = this.props;
-    return (
-      <React.Fragment>
+    const { card, index, cardsLength, boardId, listId, isDragging, connectDragSource } = this.props;
+    const opacity = isDragging ? 0 : 1;
+    return  connectDragSource(
+      <div style={{ opacity }}>
         {card.length !== 0 && (
           <div className="card-wrapper row mt-2 mb-0 mx-0">
             <div
@@ -147,9 +170,17 @@ export default class Cards extends Component {
                     <div className="col-12 col-sm-12 col-md-10 card-section">
                       <h5 className="my-3 mx-0 font-weight-bold">
                         Description
-                        {card.description && <small style={{ fontSize: "14px", fontWeight: "500", paddingLeft: '10px' }}>
-                          (Click on the description to edit)
-                        </small>}
+                        {card.description && (
+                          <small
+                            style={{
+                              fontSize: "14px",
+                              fontWeight: "500",
+                              paddingLeft: "10px"
+                            }}
+                          >
+                            (Click on the description to edit)
+                          </small>
+                        )}
                       </h5>
                       {!this.state.saveDescription && (
                         <p
@@ -276,7 +307,9 @@ export default class Cards extends Component {
                               name="toList"
                               onChange={this.common.handleChange.bind(this)}
                             >
-                              <option defaultValue="Choose a list">Choose a list</option>
+                              <option defaultValue="Choose a list">
+                                Choose a list
+                              </option>
                               {this.context.currentBoard.lists.map(list => (
                                 <option key={list._id} value={list._id}>
                                   {list.title}
@@ -378,7 +411,9 @@ export default class Cards extends Component {
             )}
           </div>
         )}
-      </React.Fragment>
+      </div>
     );
   }
 }
+
+export default DragSource("cards", itemSource, collect)(Cards);
