@@ -1,6 +1,6 @@
 var config = {
-  db_host: "mongodb://localhost:27017/trelloClone",
-  server_port: 4000,
+  db_host: "mongodb://sabarishv95:Qwerty1234@ds127736.mlab.com:27736/trello-clone",
+  server_port: process.env.PORT || 4000,
   createBoard: '/createBoard',
   findAllBoards: '/findAllBoards',
   findOneBoard: '/findBoard/:id',
