@@ -30,14 +30,14 @@ mongoose.connection.on('error', (err) => {
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, '../', 'client', 'build')));
+app.use(express.static(path.join(__dirname, 'client', 'build')));
 app.use('/board', BoardApi);
 app.use('/list', ListApi);
 app.use('/card', cardApi);
 app.use('/comment', commentApi);
 
 app.get('*', function (req, res) {
-    res.sendFile(path.join(__dirname, '../', 'client', 'build', 'index.html'));
+    res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
 });
 
 app.listen(config.server_port, function () {
