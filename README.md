@@ -15,4 +15,4 @@ After cloning into the repository, to run the app, do the following:
 
 NOTE: MongoDB has to be running in port 27017.
 
-Open the application in http://locahost:3000
+Open the application in http://locahost:4000
