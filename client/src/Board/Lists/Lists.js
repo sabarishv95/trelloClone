@@ -9,6 +9,7 @@ function collect(connect, monitor) {
   return {
     connectDropTarget: connect.dropTarget(),
     hovered: monitor.isOver(),
+    source: monitor.getItem()
   };
 }
 
@@ -19,7 +20,8 @@ class Lists extends Component {
       createList: false,
       editList: false,
       moveAllCards: false,
-      listTitle: ""
+      listTitle: "",
+      cardTitle: ""
     };
     this.deleteList = this.deleteList.bind(this);
     this.moveAllCards = this.moveAllCards.bind(this);
@@ -29,7 +31,9 @@ class Lists extends Component {
 
   static contextType = AppContext;
 
-  createList() {
+  createList(e) {
+    e.persist();
+    e.preventDefault();
     this.common
       .post(`/list/createList`, {
         title: this.state.listTitle,
@@ -72,16 +76,30 @@ class Lists extends Component {
   moveCard(card, listId) {
     // drop()
     this.common
-      .put(
-        `/card/moveCard/${card._id}/${card.list}/${
-          listId
-        }`
-      )
+      .put(`/card/moveCard/${card._id}/${card.list}/${listId}`)
       .then(response => {
         this.common
           .get(`/board/findBoard/${this.props.boardId}`)
           .then(response => {
             this.context.manageBoard(response.data);
+          });
+      });
+  }
+
+  createCard(e) {
+    e.persist();
+    e.preventDefault();
+    this.common
+      .post(`/card/createCard/`, {
+        title: this.state.cardTitle,
+        list: this.props.list._id
+      })
+      .then(response => {
+        this.common
+          .get(`/board/findBoard/${this.props.boardId}`)
+          .then(response => {
+            this.context.manageBoard(response.data);
+            this.setState({ cardTitle: "" });
           });
       });
   }
@@ -92,7 +110,9 @@ class Lists extends Component {
       index,
       listLength,
       boardId,
-      connectDropTarget
+      connectDropTarget,
+      hovered,
+      source
     } = this.props;
     return connectDropTarget(
       <div>
@@ -214,26 +234,68 @@ class Lists extends Component {
                 <Cards
                   key={card._id}
                   card={card}
-                  index={index}
-                  cardsLength={list.cards.length}
                   boardId={boardId}
                   listId={list._id}
-                  handleDrop={(card, listId) => this.moveCard(card,listId)}
+                  handleDrop={(card, listId) => this.moveCard(card, listId)}
                 />
               ))}
             {list.cards.length === 0 && (
               <Cards
                 key={list._id}
                 card={list.cards}
-                index={-1}
-                cardsLength={list.cards.length}
                 boardId={boardId}
                 listId={list._id}
+                handleDrop={(card, listId) => this.moveCard(card, listId)}
               />
             )}
+            {hovered && source.list !== list._id && (
+              <div className="hovered col-md-12 px-0 py-1 mt-2" />
+            )}
+            <div className="col-md-12 px-0 py-1 add-card">
+              {this.context.createCard !== list._id && (
+                <p
+                  className="m-0"
+                  onClick={() => {
+                    this.context.manageBoard(list._id);
+                    this.setState({ cardTitle: "", editList: false });
+                  }}
+                >
+                  <i className="fas fa-plus" />
+                  <span>Add another card</span>
+                </p>
+              )}
+              {this.context.createCard === list._id && (
+                <form className="mt-3 card-form">
+                  <input
+                    type="text"
+                    id="cardTitle"
+                    name="cardTitle"
+                    className="card-title d-block"
+                    placeholder="Enter card title"
+                    value={this.state.cardTitle}
+                    onChange={this.common.handleChange.bind(this)}
+                    autoFocus={true}
+                    autoComplete="off"
+                  />
+                  <div>
+                    <button
+                      className="btn btn-success mt-2"
+                      onClick={this.createCard.bind(this)}
+                      disabled={this.state.cardTitle === "" ? true : false}
+                    >
+                      Add card
+                    </button>
+                    <i
+                      className="mt-2 fas fa-times"
+                      onClick={() => this.context.manageBoard(null)}
+                    />
+                  </div>
+                </form>
+              )}
+            </div>
           </div>
         )}
-        {index === listLength - 1 && (
+        {(index === listLength - 1) && (
           <div
             className="d-inline-block add-list p-2"
             onClick={() =>
@@ -242,13 +304,13 @@ class Lists extends Component {
               })
             }
           >
-            {!this.state.createList && (
+            {!this.state.createList && listLength !== 0 && (
               <p className="m-0">
-                <span> + </span>Add another list
+                <span> + </span>Add a list
               </p>
             )}
-            {this.state.createList && (
-              <div className="mt-3 list-form">
+            {(this.state.createList || listLength === 0) && (
+              <form className="mt-3 list-form">
                 <input
                   type="text"
                   id="listTitle"
@@ -258,6 +320,8 @@ class Lists extends Component {
                   value={this.state.listTitle}
                   onChange={this.common.handleChange.bind(this)}
                   onClick={e => e.stopPropagation()}
+                  autoFocus={true}
+                  autoComplete="off"
                 />
                 <div>
                   <button
@@ -278,7 +342,7 @@ class Lists extends Component {
                     }}
                   />
                 </div>
-              </div>
+              </form>
             )}
           </div>
         )}
@@ -287,8 +351,15 @@ class Lists extends Component {
   }
 }
 
-export default DropTarget("cards", {
-  drop({ list }) {
-    return { list };
+export default DropTarget(
+  "cards",
+  {
+    drop({ list }) {
+      return { list };
+    },
+    canDrop({ list }, monitor) {
+      return monitor.getItem().list !== list._id;
+    }
   },
-}, collect)(Lists);
+  collect
+)(Lists);

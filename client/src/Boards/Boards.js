@@ -99,6 +99,7 @@ export default class Boards extends Component {
                     placeholder="Enter board name"
                     value={this.state.boardName}
                     onChange={this.common.handleChange.bind(this)}
+                    autoComplete='off'
                   />
                 </form>
               </div>

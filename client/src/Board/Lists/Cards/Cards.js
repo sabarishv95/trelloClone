@@ -24,7 +24,8 @@ function collect(connect, monitor) {
   return {
     connectDragSource: connect.dragSource(),
     connectDragPreview: connect.dragPreview(),
-    isDragging: monitor.isDragging()
+    isDragging: monitor.isDragging(),
+    dropped: monitor.didDrop()
   };
 }
 
@@ -37,7 +38,6 @@ class Cards extends Component {
       cancelSave: false,
       moveCard: false,
       toList: null,
-      cardTitle: "",
       cardDescription: ""
     };
 
@@ -45,21 +45,6 @@ class Cards extends Component {
   }
 
   static contextType = AppContext;
-
-  createCard() {
-    this.common
-      .post(`/card/createCard/`, {
-        title: this.state.cardTitle,
-        list: this.props.listId
-      })
-      .then(response => {
-        this.common
-          .get(`/board/findBoard/${this.props.boardId}`)
-          .then(response => {
-            this.context.manageBoard(response.data);
-          });
-      });
-  }
 
   updateCard() {
     setTimeout(() => {
@@ -118,9 +103,16 @@ class Cards extends Component {
   }
 
   render() {
-    const { card, index, cardsLength, boardId, listId, isDragging, connectDragSource } = this.props;
-    const opacity = isDragging ? 0 : 1;
-    return  connectDragSource(
+    const {
+      card,
+      boardId,
+      listId,
+      isDragging,
+      dropped,
+      connectDragSource
+    } = this.props;
+    const opacity = isDragging || dropped ? 0 : 1;
+    return connectDragSource(
       <div style={{ opacity }}>
         {card.length !== 0 && (
           <div className="card-wrapper row mt-2 mb-0 mx-0">
@@ -198,7 +190,6 @@ class Cards extends Component {
                       {(this.state.saveDescription ||
                         !this.props.card.description) && (
                         <Textarea
-                          autoFocus={true}
                           id="cardDescription"
                           name="cardDescription"
                           className={classnames({
@@ -367,48 +358,6 @@ class Cards extends Component {
                 </div>
               </div>
             </div>
-          </div>
-        )}
-        {index === cardsLength - 1 && (
-          <div className="col-md-12 px-0 py-1 add-card">
-            {this.context.createCard !== listId && (
-              <p
-                className="m-0"
-                onClick={() => {
-                  this.context.manageBoard(listId);
-                  this.setState({ cardTitle: "" });
-                }}
-              >
-                <i className="fas fa-plus" />
-                <span>Add card</span>
-              </p>
-            )}
-            {this.context.createCard === listId && (
-              <div className="mt-3 card-form">
-                <input
-                  type="text"
-                  id="cardTitle"
-                  name="cardTitle"
-                  className="card-title d-block"
-                  placeholder="Enter card title"
-                  value={this.state.cardTitle}
-                  onChange={this.common.handleChange.bind(this)}
-                />
-                <div>
-                  <button
-                    className="btn btn-success mt-2"
-                    onClick={this.createCard.bind(this)}
-                    disabled={this.state.cardTitle === "" ? true : false}
-                  >
-                    Add another card
-                  </button>
-                  <i
-                    className="mt-2 fas fa-times"
-                    onClick={() => this.context.manageBoard(null)}
-                  />
-                </div>
-              </div>
-            )}
           </div>
         )}
       </div>

@@ -127,9 +127,22 @@ router.put(config.moveAllCards, (req, res, next) => {
           .then(toList => {
             toList.cards = toList.cards.concat(fromList.cards);
             toList.save();
-            fromList.cards.splice(0);
-            fromList.save();
-            res.json(toList);
+            Card.updateMany(
+              { list: req.params.fromList },
+              {
+                $set: {
+                  list: req.params.toList
+                }
+              }
+            )
+              .then(cards => {
+                fromList.cards.splice(0);
+                fromList.save();
+                res.json(toList);
+              })
+              .catch(error => {
+                next(error);
+              });
           })
           .catch(error => {
             next(error);

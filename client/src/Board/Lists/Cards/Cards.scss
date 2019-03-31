@@ -102,38 +102,3 @@
     }
   }
 }
-.add-card {
-  background: transparent;
-  margin-top: 10px;
-  cursor: pointer;
-  border: 1px solid transparent;
-  border-radius: 3px;
-
-  p {
-    span {
-      margin-left: 10px;
-    }
-  }
-
-  &:hover {
-    background: rgba(9, 45, 66, 0.13);
-  }
-  .card-form {
-    display: flex;
-    flex-direction: column;
-    div {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      .card-title,
-      .card-description {
-        border-radius: 3px;
-        background: #fff;
-      }
-      i {
-        font-size: 20px;
-        margin-left: 10px;
-      }
-    }
-  }
-}
