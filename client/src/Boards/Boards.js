@@ -41,7 +41,8 @@ export default class Boards extends Component {
           };
         });
         this.context.manageBoard(response.data);
-        $('#modal').modal('toggle');
+        $('#modal').toggle();
+        $('.modal-backdrop').remove();
         this.props.history.push(`/board/${response.data._id}`);
       });
   }
