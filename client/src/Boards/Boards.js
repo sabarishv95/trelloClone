@@ -41,7 +41,7 @@ export default class Boards extends Component {
           };
         });
         this.context.manageBoard(response.data);
-        $('#createBoard').modal('toggle');
+        $('#modal').modal('toggle');
         this.props.history.push(`/board/${response.data._id}`);
       });
   }
@@ -72,7 +72,7 @@ export default class Boards extends Component {
           </div>
         </div>
         <div
-          className="modal fade"
+          className="modal fade hide"
           id="createBoard"
           role="dialog"
           aria-labelledby="ModalLabel"
