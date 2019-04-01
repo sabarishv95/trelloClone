@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import "./Boards.scss";
 import AppContext from "../App.context";
 import Common from "../Common";
+import * as $ from 'jquery';
 
 export default class Boards extends Component {
   constructor(props) {
@@ -28,7 +29,9 @@ export default class Boards extends Component {
     });
   }
 
-  createBoard() {
+  createBoard(e) {
+    e.persist();
+    e.preventDefault();
     this.common
       .post(`/board/createBoard`, { name: this.state.boardName })
       .then(response => {
@@ -38,6 +41,7 @@ export default class Boards extends Component {
           };
         });
         this.context.manageBoard(response.data);
+        $('#createBoard').modal('toggle');
         this.props.history.push(`/board/${response.data._id}`);
       });
   }
@@ -90,7 +94,7 @@ export default class Boards extends Component {
                 </button>
               </div>
               <div className="modal-body">
-                <form className="create-board-form">
+                <form className="create-board-form" onSubmit={this.createBoard.bind(this)}>
                   <input
                     type="text"
                     id="boardName"
